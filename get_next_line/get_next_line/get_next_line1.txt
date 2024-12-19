@@ -1,0 +1,108 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mmefo <mmefo@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/26 13:40:17 by mmefo             #+#    #+#             */
+/*   Updated: 2024/12/13 15:34:09 by mmefo            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "get_next_line.h"
+
+int	linelen(char *stock, char *buffer, ssize_t byreads, int fd)
+{
+	int		i;
+	int		j;
+
+	i = 0;
+	j = 1;
+	while (byreads > j && buffer[i] != '\n')
+	{
+		byreads = read(fd, stock, BUFFER_SIZE);
+		buffer[i] = stock[i];
+		i++;
+	}
+	return (i);
+}
+
+char	*get_line(char *line, char *buffer, char *stock, int fd)
+{
+	int		line_len;
+	int		i;
+	ssize_t	byreads;
+
+	i = 0;
+	byreads = 1;
+	line_len = linelen(stock, buffer, byreads, fd);
+	line = (char *)malloc(line_len + 1);
+	if (!line)
+		ft_free(buffer);
+	if (byreads == 0)
+		return (NULL);
+	while (byreads > 0 && line[i] != '\n')
+	{
+		byreads = read(fd, stock, BUFFER_SIZE);
+		line[i] = buffer[i];
+		i++;
+	}
+	line[i] = '\0';
+	return (line);
+}
+
+char	*next_line(char *line, char *buffer)
+{
+	int	i;
+	int	rest;
+
+	i = 0;
+	free(line);
+	rest = ft_strlen(ft_strchr(buffer));
+	ft_free(line);
+	line = (char *)malloc(rest);
+	if (!line)
+		return (NULL);
+	line = ft_strcpy(line, ft_strchr(buffer));
+	return (line);
+}
+
+char	*get_next_line(int fd)
+{
+	char			*buffer;
+	char			*line;
+	ssize_t			byreads;
+	static char		*stock = NULL;
+
+	byreads = 0;
+	line = NULL;
+	buffer = (char *)malloc(BUFFER_SIZE + 1);
+	if (!buffer)
+		return (NULL);
+	byreads = read(fd, stock, BUFFER_SIZE);
+	stock[byreads] = '\0';
+	if (byreads <= 0)
+		return (NULL);
+	line = get_line(line, buffer, stock, fd);
+	line = next_line(line, stock);
+	return (line);
+}
+
+/**
+ * tant que pas de \n 
+ * 		read(fd)
+ * 		join(line, fd)
+ */
+
+int main()
+{
+	char *line;
+	int fd = open("test.txt", O_RDONLY);
+	while ((line = get_next_line(fd)) != NULL)
+	{
+		printf("%s", get_next_line(fd));
+		ft_free(line);
+	}
+	close(fd);
+}
