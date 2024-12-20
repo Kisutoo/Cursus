@@ -23,11 +23,9 @@
 # endif
 
 char	*get_next_line(int fd);
-char	*ft_free(char *str);
-char	*ft_strchr(const char *str);
-int		ft_strlen(char *str);
-char	*ft_strcpy(char *dest, char *src);
-char	*ft_strjoin(char *s1, char *s2);
-int		isbacks(char *str);
+char 	*ft_strjoin(char *s1, const char *s2);
+char	*ft_strdup(const char *str);
+size_t	ft_strlen(const char *str);
+char	*ft_strchr(const char *str, int c);
 
 #endif

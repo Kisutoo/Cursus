@@ -12,96 +12,99 @@
 
 #include "get_next_line.h"
 
-char	*get_line(char *buffer, char *stock, int fd, ssize_t byreads)
+static char	*get_line(char **stash)
 {
-	int		i;
-
-	i = 0;
-	while (byreads > 0 || isbacks(buffer) != 0)
-	{
-		byreads = read(fd, stock, BUFFER_SIZE);
-		buffer = ft_strjoin(buffer, stock);
-	}
-	buffer[i] = '\0';
-	return (buffer);
-}
-
-char	*next_line(char *line, char *stock)
-{
-	int	i;
-
-	i = 0;
-	line = ft_strchr(stock);
-	while (stock[i] != '\n')
-	{
-		line[i] = stock[i];
-		i++;
-	}
-	return (line);
-}
-
-// char	*buffertest(char *buffer, char *stock, int fd, ssize_t byreads)
-// {
-// 	int	i;
-
-// 	i = 0;
-// 	while (byreads >= 0 && buffer[i] != '\n')
-// 	{
-// 		byreads = read(fd, stock, BUFFER_SIZE);
-// 		buffer = ft_strjoin(buffer, stock);
-// 		i++;
-// 	}
-// 	return (stock);
-// }
-
-char	*get_next_line(int fd)
-{
-	char		*buffer;
-	ssize_t		byreads;
-	char		*line;
-	static char	stock[BUFFER_SIZE];
-
-	byreads = 1;
-	buffer = (char *)malloc(BUFFER_SIZE);
-	if (!buffer)
-		return (NULL);
-	line = (char *)malloc(sizeof(char) * 800);
-	if (!line)
-		ft_free(buffer);
-	line = get_line(buffer, stock, fd, byreads);
-	// next_line(line, stock);
-	free(buffer);
-	return (line);
-}
-
-int main()
-{
+	size_t i;
+	size_t a;
 	char *line;
-	int fd = open("test.txt", O_RDONLY);
-	while ((line = get_next_line(fd)) != NULL)
-	{
-		printf("%s", get_next_line(fd));
-		free(line);
-	}
+	char *new_stash;
 
-	close(fd);
+	i = 0;
+	a = 0;
+	if (!*stash || !**stash)
+		return (free(*stash), *stash = NULL, NULL);
+	while ((*stash)[i] && (*stash)[i] != '\n')
+		i++;
+	line = malloc(i + 2);
+	if (!line)
+		return (NULL);
+	while (a < i)
+	{
+		line[a] = (*stash)[a];
+		a++;
+	}
+	if ((*stash)[i] == '\n')
+		line[i++] = '\n';
+	line[i] = '\0';
+	if ((*stash)[i])
+		new_stash = ft_strdup(*stash + i);
+	else
+		new_stash = NULL;
+	free(*stash);
+	*stash = new_stash;
+	return (line);
 }
 
-// int main()
-// {
-// 	ssize_t byreads = 1;
-// 	static char *stock = NULL;
-// 	char *buffer = NULL;
-// 	int fd = open("test.txt", O_RDONLY);
+char *get_next_line(int fd)
+{
+	static char *stash = NULL;
+	char		 *buffer;
+	char		 *line;
+	ssize_t 	byreads;
 
-// 	stock = (char *)malloc(BUFFER_SIZE);
-// 	if (!stock)
-// 		return (0);
-// 	buffer = (char *)malloc(BUFFER_SIZE);
-// 	if (!buffer)
-// 		ft_free(stock);
-// 	printf("%s\n", get_line(buffer, stock, fd, byreads));
-	
-// 	printf("%s\n--------------------\n", buffertest(buffer, stock, fd, byreads));
-// 	close(fd);
+	if ((fd < 0) || (BUFFER_SIZE <= 0))
+		return (NULL);
+	if (!stash)
+		stash = ft_strdup("");
+	if (!stash)
+		return (NULL);
+	while (!ft_strchr(stash, '\n'))
+	{
+		buffer = malloc(BUFFER_SIZE + 1);
+		if (!buffer)
+			return (free(stash), stash = NULL, NULL);
+		byreads = read(fd, buffer, BUFFER_SIZE);
+		if (byreads <= 0)
+		{
+			free(buffer);
+			break;
+		}
+		buffer[byreads] = '\0';
+		stash = ft_strjoin(stash, buffer);
+		free(buffer);
+		if (!stash)
+			return (NULL);
+	}
+	line = get_line(&stash);
+	return (line);
+}
+
+
+// int main(int argc, char **argv)
+// {
+//     int fd;
+//     char *line;
+
+//     if (argc != 2)
+//     {
+//         printf("Usage: %s <filename>\n", argv[0]);
+//         return (1);
+//     }
+//     fd = open(argv[1], O_RDONLY);
+//     if (fd < 0)
+//     {
+//         perror("Error opening file");
+//         return (1);
+//     }
+//     while ((line = get_next_line(fd)) != NULL)
+//     {
+//         printf("%s", line);
+//         free(line);
+//     }
+//     if (close(fd) < 0)
+//     {
+//         perror("Error closing file");
+//         return (1);
+//     }
+//     return (0);
 // }

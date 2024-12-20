@@ -12,7 +12,7 @@
 
 #include "get_next_line.h"
 
-char	*ft_strchr(const char *str)
+char	*ft_strchr(const char *str, int c)
 {
 	int		i;
 
@@ -21,71 +21,69 @@ char	*ft_strchr(const char *str)
 		return (NULL);
 	while (str[i])
 	{
-		if (str[i] == '\n')
+		if (str[i] == c)
 			return ((char *)(str + i));
 		i++;
 	}
 	return (NULL);
 }
 
-char	*ft_free(char *str)
+size_t ft_strlen(const char *str)
 {
-	free(str);
-	return (NULL);
+	size_t len;
+
+	len = 0;
+	while (str && str[len])
+		len++;
+	return (len);
 }
 
-int	ft_strlen(char *str)
+char *ft_strdup(const char *str)
 {
-	int	i;
-
-	i = 0;
-	if (!str)
-		return (0);
-	while (str[i])
-		i++;
-	return (i);
-}
-
-char	*ft_strjoin(char *s1, char *s2)
-{
-	int		i;
-	int		j;
-	char	*dest;
-
-	j = 0;
-	i = 0;
-	if (!s1 || !s2)
-		return (NULL);
-	dest = (char *)malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
+	size_t len;
+	size_t i;
+	char *dest;
+	
+	len = ft_strlen(str);
+	dest = malloc(len + 1);
 	if (!dest)
 		return (NULL);
-	while (s1[i])
+	i = 0;
+	while (i < len)
 	{
-		dest[i] = s1[i];
+		dest[i] = str[i];
 		i++;
-	}
-	while (s2[j])
-	{
-		dest[i] = s2[j];
-		i++;
-		j++;
 	}
 	dest[i] = '\0';
 	return (dest);
 }
 
-int	isbacks(char *str)
+char *ft_strjoin(char *s1, const char *s2)
 {
-	int	i;
+	size_t	i;
+	size_t	len1;
+	size_t	len2;
+	char	*new_str;
 
+	len1 = ft_strlen(s1);
+	len2 = ft_strlen(s2);
+	new_str = malloc(len1 + len2 + 1);
+	if (!new_str)
+		return (free(s1), NULL);
 	i = 0;
-	while (str[i])
+	while (i < len1)
 	{
-		if (str[i] == '\n')
-			return (0);
+		new_str[i] = s1[i];
 		i++;
 	}
-	return (1);
+	while (i < len1 + len2)
+	{
+		new_str[i] = s2[i - len1];
+		i++;
+	}
+	new_str[i] = '\0';
+	free(s1);
+	return(new_str);
 }
 
 // int main()
